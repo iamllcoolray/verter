@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Verter.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="30">
+            <Label x:Name="SelectedFileLabel" Text="No file selected" />
+            <ProgressBar x:Name="ConversionProgressBar" Progress="0" HeightRequest="20" />
+            <Label x:Name="StatusLabel" Text="Idle" />
+            <Button x:Name="PickButton" Text="Pick Files" Clicked="OnPickClicked" />
+            <Button x:Name="ConvertButton" Text="Convert" Clicked="OnConvertClicked" IsEnabled="False" />
+            <Button x:Name="CancelButton" Text="Cancel" Clicked="OnCancelClicked" IsEnabled="False" />
+            <Button x:Name="ClearButton" Text="Clear" Clicked="OnClearClicked" IsEnabled="False" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
