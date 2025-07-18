@@ -1,18 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Verter.MainPage">
+             x:Class="Verter.MainPage"
+             Title="Verter - Video Converter">
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="20" Padding="30">
-            <Label x:Name="SelectedFileLabel" Text="No file selected" />
-            <Label x:Name="StatusLabel" Text="Idle" />
-            <ProgressBar x:Name="ConversionProgressBar" Progress="0" HeightRequest="20" IsVisible="False" />
-            <Button x:Name="PickButton" Text="Pick Files" Clicked="OnPickClicked" />
+    <VerticalStackLayout Padding="20" Spacing="12">
+
+        <Label x:Name="StatusLabel" Text="Idle" FontAttributes="Italic" />
+
+        <Label x:Name="SelectedFileLabel" Text="No file selected." />
+
+        <ProgressBar x:Name="ConversionProgressBar" HeightRequest="10" IsVisible="False" />
+
+        <ScrollView x:Name="FileListScrollView"  IsVisible="False">
+            <CollectionView x:Name="FileList" HeightRequest="120">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding}" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+
+        <HorizontalStackLayout>
+            <Button x:Name="PickButton" Text="Pick Files" Clicked="OnPickClicked" IsEnabled="True" />
             <Button x:Name="ConvertButton" Text="Convert" Clicked="OnConvertClicked" IsEnabled="False" />
             <Button x:Name="CancelButton" Text="Cancel" Clicked="OnCancelClicked" IsEnabled="False" />
             <Button x:Name="ClearButton" Text="Clear" Clicked="OnClearClicked" IsEnabled="False" />
-        </VerticalStackLayout>
-    </ScrollView>
+        </HorizontalStackLayout>
+
+    </VerticalStackLayout>
 
 </ContentPage>

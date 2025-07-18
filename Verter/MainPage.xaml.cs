@@ -11,6 +11,7 @@ public partial class MainPage : ContentPage
 {
     private CancellationTokenSource? cancellationTokenSource;
     private List<string> inputFiles = [];
+    private readonly string[] supportedExtensions = { ".flv", ".mov", ".mkv", ".m4v", ".ts", ".webm", ".avi" };
 
     public MainPage()
     {
@@ -19,31 +20,34 @@ public partial class MainPage : ContentPage
 
     private async void OnPickClicked(object sender, EventArgs e)
     {
-    #if ANDROID || IOS
         var result = await FilePicker.Default.PickMultipleAsync(new PickOptions
         {
             FileTypes = FilePickerFileType.Videos,
-            PickerTitle = "Pick one or more video files"
+            PickerTitle = "Select one or more video files"
         });
-    #else
-        var result = await FilePicker.PickMultipleAsync(new PickOptions
-        {
-            FileTypes = FilePickerFileType.Videos,
-            PickerTitle = "Pick one or more video files"
-        });
-    #endif
 
         if (result != null && result.Any())
         {
-            inputFiles = result.Select(file => file.FullPath).ToList();
-            SelectedFileLabel.Text = $"Selected {inputFiles.Count} file(s)";
-            ConvertButton.IsEnabled = true;
+            if (!result.All(file => supportedExtensions.Any(ext => file.FullPath.EndsWith(ext, StringComparison.OrdinalIgnoreCase))))
+            {
+                StatusMessage("MP4 files were selected. Please select files with different extensions.", Colors.Red);
+                return;
+            }
+            
+            inputFiles = [.. result.Select(file => file.FullPath)];
+            
+            RefreshFileList();
+
+            StatusMessage("Idle", Colors.Gray);
+
+            SelectedFileMessage($"Selected {inputFiles.Count} file(s)", Colors.Gray);
         }
     }
 
     private async void OnConvertClicked(object sender, EventArgs e)
     {
         StatusLabel.Text = "Converting...";
+        PickButton.IsEnabled = false;
         ConvertButton.IsEnabled = false;
         CancelButton.IsEnabled = true;
         ClearButton.IsEnabled = false;
@@ -88,8 +92,12 @@ public partial class MainPage : ContentPage
                         // Per file progress normalized across total files
                         double fileProgress = args.Percent / 100.0;
                         double totalProgress = ((currentFile - 1) + fileProgress) / totalFiles;
+                        
                         ConversionProgressBar.Progress = totalProgress;
-                        StatusLabel.Text = $"Converting {Path.GetFileName(inputPath)}: {args.Percent:0}%";
+
+                        SelectedFileMessage($"Converting {Path.GetFileName(inputPath)}: {args.Percent:0}%", Colors.Gray);
+
+                        StatusMessage($"File {currentFile} of {totalFiles}", Colors.Gray);
                     });
                 };
 
@@ -103,7 +111,14 @@ public partial class MainPage : ContentPage
                 Console.WriteLine($"✅ Finished: {outputPath}");
             }
 
-            StatusLabel.Text = token.IsCancellationRequested ? "Conversion canceled." : "All files converted!";
+            if (!token.IsCancellationRequested)
+            {
+                StatusMessage("Conversion completed successfully!", Colors.Green);
+            }
+            else
+            {
+                StatusMessage("Conversion was canceled.", Colors.Red);
+            }
 
             ConversionProgressBar.Progress = 1;
         }
@@ -115,24 +130,31 @@ public partial class MainPage : ContentPage
         finally
         {
             cancellationTokenSource = null;
-            ConvertButton.IsEnabled = true;
+            PickButton.IsEnabled = true;
+            ConvertButton.IsEnabled = false;
             CancelButton.IsEnabled = false;
-            ClearButton.IsEnabled = true;
+            ClearButton.IsEnabled = inputFiles.Any();
             ConversionProgressBar.IsVisible = false;
+
+            SelectedFileMessage($"Selected {inputFiles.Count} file(s)", Colors.Gray);
         }
     }
 
     private void OnCancelClicked(object sender, EventArgs e)
     {
         cancellationTokenSource?.Cancel();
-        StatusLabel.Text = "Canceling...";
+        StatusMessage("Conversion canceled.", Colors.Red);
     }
 
     private void OnClearClicked(object sender, EventArgs e)
     {
         inputFiles.Clear();
-        StatusLabel.Text = "Cleared file list.";
-        SelectedFileLabel.Text = "No file selected.";
+        RefreshFileList();
+
+        StatusMessage("Cleared file list.", Colors.Red);
+
+        SelectedFileMessage("No file selected.", Colors.Gray);
+
         ConversionProgressBar.Progress = 0;
         ClearButton.IsEnabled = false;
         ConvertButton.IsEnabled = false;
@@ -156,5 +178,27 @@ public partial class MainPage : ContentPage
         await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, ffmpegFolder);
 
         FFmpeg.SetExecutablesPath(ffmpegFolder);
+    }
+
+    private void RefreshFileList()
+    {
+        FileList.ItemsSource = null;
+        FileList.ItemsSource = inputFiles;
+
+        ConvertButton.IsEnabled = inputFiles.Any();
+        ClearButton.IsEnabled = inputFiles.Any();
+        FileListScrollView.IsVisible = inputFiles.Any();
+    }
+
+    private void StatusMessage(string message, Color color)
+    {
+        StatusLabel.Text = message;
+        StatusLabel.TextColor = color;
+    }
+
+    private void SelectedFileMessage(string message, Color color)
+    {
+        SelectedFileLabel.Text = message;
+        SelectedFileLabel.TextColor = color;
     }
 }
