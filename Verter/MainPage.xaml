@@ -6,8 +6,8 @@
     <ScrollView>
         <VerticalStackLayout Spacing="20" Padding="30">
             <Label x:Name="SelectedFileLabel" Text="No file selected" />
-            <ProgressBar x:Name="ConversionProgressBar" Progress="0" HeightRequest="20" />
             <Label x:Name="StatusLabel" Text="Idle" />
+            <ProgressBar x:Name="ConversionProgressBar" Progress="0" HeightRequest="20" IsVisible="False" />
             <Button x:Name="PickButton" Text="Pick Files" Clicked="OnPickClicked" />
             <Button x:Name="ConvertButton" Text="Convert" Clicked="OnConvertClicked" IsEnabled="False" />
             <Button x:Name="CancelButton" Text="Cancel" Clicked="OnCancelClicked" IsEnabled="False" />

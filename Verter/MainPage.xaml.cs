@@ -11,7 +11,6 @@ public partial class MainPage : ContentPage
 {
     private CancellationTokenSource? cancellationTokenSource;
     private List<string> inputFiles = [];
-    private int currentProcessId = 0;
 
     public MainPage()
     {
@@ -48,6 +47,7 @@ public partial class MainPage : ContentPage
         ConvertButton.IsEnabled = false;
         CancelButton.IsEnabled = true;
         ClearButton.IsEnabled = false;
+        ConversionProgressBar.IsVisible = true;
         ConversionProgressBar.Progress = 0;
 
         cancellationTokenSource = new CancellationTokenSource();
@@ -118,6 +118,7 @@ public partial class MainPage : ContentPage
             ConvertButton.IsEnabled = true;
             CancelButton.IsEnabled = false;
             ClearButton.IsEnabled = true;
+            ConversionProgressBar.IsVisible = false;
         }
     }
 
